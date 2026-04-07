@@ -15,8 +15,9 @@ COPY pyproject.toml README.md ./
 COPY src ./src
 
 # Install with pip (simple, no uv complexity)
-# Install package + all deps (non-editable for proper dep resolution)
-RUN pip install --no-cache-dir .
+# Bust Docker cache and install package + all deps
+ARG CACHE_BUST=1
+RUN pip install --no-cache-dir ".[dev]" || pip install --no-cache-dir .
 
 # Defaults suitable for container
 ENV HTTP_HOST=0.0.0.0 \
