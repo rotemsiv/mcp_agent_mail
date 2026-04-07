@@ -24,7 +24,7 @@ RUN uv sync --no-dev
 # Copy all source and install the package
 COPY src ./src
 COPY scripts ./scripts
-RUN pip install --no-deps -e .
+RUN pip install -e .
 
 # Defaults suitable for container
 ENV HTTP_HOST=0.0.0.0 \
