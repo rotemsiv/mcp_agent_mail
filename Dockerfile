@@ -29,7 +29,7 @@ ENV HTTP_HOST=0.0.0.0 \
     STORAGE_ROOT=/data/mailbox
 
 EXPOSE 8765
-VOLUME ["/data"]
+# VOLUME ["/data"]  # Removed: Railway bans VOLUME in Dockerfiles, use Railway volumes instead
 
 # Create non-root user and set ownership on data dir
 RUN adduser --disabled-password --gecos "" --uid 10001 appuser && \
