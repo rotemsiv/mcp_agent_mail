@@ -21,9 +21,10 @@ COPY pyproject.toml README.md ./
 # Install runtime deps
 RUN uv sync --no-dev
 
-# Copy source and install the package
+# Copy all source and install the package
 COPY src ./src
-RUN uv pip install -e .
+COPY scripts ./scripts
+RUN pip install --no-deps -e .
 
 # Defaults suitable for container
 ENV HTTP_HOST=0.0.0.0 \
