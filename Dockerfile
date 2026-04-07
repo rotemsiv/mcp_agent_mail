@@ -4,15 +4,17 @@ FROM python:3.14-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_SYSTEM_PYTHON=1 \
-    UV_INSTALL_DIR="/usr/local/bin" \
     PATH="/usr/local/bin:${PATH}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Install uv to shared path (accessible by all users)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Install uv and make it accessible to all users
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    cp /root/.local/bin/uv /usr/local/bin/uv && \
+    cp /root/.local/bin/uvx /usr/local/bin/uvx && \
+    chmod +x /usr/local/bin/uv /usr/local/bin/uvx
 
 WORKDIR /app
 
