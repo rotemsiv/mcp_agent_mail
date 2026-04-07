@@ -2,36 +2,27 @@
 FROM python:3.14-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    UV_SYSTEM_PYTHON=1 \
-    PATH="/root/.local/bin:/usr/local/bin:${PATH}"
+    PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Install uv (used only during build as root)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
 WORKDIR /app
 
-# Copy project metadata and sync deps first for better caching
-# README.md is required by hatchling since pyproject.toml references it
+# Copy everything needed for install
 COPY pyproject.toml README.md ./
-# Install runtime deps
-RUN uv sync --no-dev
-
-# Copy all source and install the package
 COPY src ./src
 COPY scripts ./scripts
-RUN pip install -e .
+
+# Install with pip (simple, no uv complexity)
+RUN pip install --no-cache-dir -e .
 
 # Defaults suitable for container
 ENV HTTP_HOST=0.0.0.0 \
     STORAGE_ROOT=/data/mailbox
 
 EXPOSE 8765
-# VOLUME ["/data"]  # Removed: Railway bans VOLUME in Dockerfiles, use Railway volumes instead
 
 # Create non-root user and set ownership on data dir
 RUN adduser --disabled-password --gecos "" --uid 10001 appuser && \
@@ -42,5 +33,5 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 \
   CMD curl -fsS http://127.0.0.1:8765/health/liveness || exit 1
 
-# Run the HTTP server (use python directly, uv is root-only)
+# Run the HTTP server
 CMD ["python", "-m", "mcp_agent_mail.cli", "serve-http"]
