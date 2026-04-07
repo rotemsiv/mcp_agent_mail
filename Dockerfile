@@ -10,11 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Install uv and make it accessible to all users
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    cp /root/.local/bin/uv /usr/local/bin/uv && \
-    cp /root/.local/bin/uvx /usr/local/bin/uvx && \
-    chmod +x /usr/local/bin/uv /usr/local/bin/uvx
+# Install uv (used only during build as root)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 WORKDIR /app
 
@@ -43,5 +40,5 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 \
   CMD curl -fsS http://127.0.0.1:8765/health/liveness || exit 1
 
-# Run the HTTP server
-CMD ["uv", "run", "python", "-m", "mcp_agent_mail.cli", "serve-http"]
+# Run the HTTP server (use python directly, uv is root-only)
+CMD ["python", "-m", "mcp_agent_mail.cli", "serve-http"]
