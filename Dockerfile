@@ -13,7 +13,6 @@ WORKDIR /app
 # Copy everything needed for install
 COPY pyproject.toml README.md ./
 COPY src ./src
-COPY scripts ./scripts
 
 # Install with pip (simple, no uv complexity)
 RUN pip install --no-cache-dir -e .
